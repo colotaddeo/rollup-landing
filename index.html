@@ -378,64 +378,34 @@
 
     /* ── ENVÍOS ── */
     .shipping-section {
-      padding: 72px 24px;
-      background: var(--light);
-    }
-    .shipping-content {
-      display: flex;
-      gap: 48px;
-      max-width: 960px;
-      margin: 0 auto;
-      align-items: flex-start;
-    }
-    .shipping-info {
-      flex: 1 1 360px;
-    }
-    .shipping-info h2 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    .shipping-info .section-sub {
-      color: var(--sub);
-      font-size: .95rem;
-      margin-bottom: 32px;
-    }
-    .shipping-items {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-    .shipping-item {
-      display: flex;
-      gap: 16px;
-      align-items: flex-start;
-    }
-    .shipping-icon {
-      font-size: 1.5rem;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-    .shipping-item strong {
-      display: block;
-      font-size: .95rem;
-      margin-bottom: 3px;
-    }
-    .shipping-item p {
-      font-size: .875rem;
-      color: var(--sub);
-      line-height: 1.5;
-      margin: 0;
-    }
-    .shipping-item--highlight {
+      padding: 28px 24px;
       background: #fff;
-      border: 1.5px solid var(--accent);
-      border-radius: 12px;
-      padding: 14px 16px;
+      border-top: 1px solid var(--mid);
+      border-bottom: 1px solid var(--mid);
+      text-align: center;
     }
-    @media (max-width: 700px) {
-      .shipping-content { flex-direction: column; }
-      .shipping-map { width: 100%; flex: none; }
+    .shipping-title {
+      font-size: .9rem;
+      color: var(--sub);
+      margin-bottom: 14px;
+    }
+    .shipping-title strong { color: var(--text); }
+    .shipping-pills {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .shipping-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--light);
+      border: 1px solid var(--mid);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: .82rem;
+      color: var(--sub);
     }
 
     /* ── FINAL CTA ── */
@@ -721,36 +691,11 @@
 
   <!-- ENVÍOS -->
   <section class="shipping-section">
-    <div class="shipping-content">
-      <div class="shipping-info">
-        <h2>Envíos y entregas</h2>
-        <p class="section-sub">Llegamos a toda el área metropolitana.</p>
-
-        <div class="shipping-items">
-          <div class="shipping-item">
-            <span class="shipping-icon">📍</span>
-            <div>
-              <strong>Ciudad de Buenos Aires</strong>
-              <p>Envíos a domicilio por toda la Ciudad.</p>
-            </div>
-          </div>
-          <div class="shipping-item">
-            <span class="shipping-icon">🚚</span>
-            <div>
-              <strong>Provincia de Buenos Aires</strong>
-              <p>Coordinamos envío a tu zona en el conurbano y más allá.</p>
-            </div>
-          </div>
-          <div class="shipping-item shipping-item--highlight">
-            <span class="shipping-icon">🎓</span>
-            <div>
-              <strong>Estudiantes de San Andrés</strong>
-              <p>Si estudiás en la Universidad de San Andrés podemos coordinar la entrega directamente ahí.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <p class="shipping-title">Envíos a <strong>CABA</strong> y <strong>Provincia de Buenos Aires</strong></p>
+    <div class="shipping-pills">
+      <div class="shipping-pill">📍 Ciudad de Buenos Aires</div>
+      <div class="shipping-pill">🚚 Conurbano y GBA</div>
+      <div class="shipping-pill">🎓 Entrega en Universidad de San Andrés</div>
     </div>
   </section>
 
