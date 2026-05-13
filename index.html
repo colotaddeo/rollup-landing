@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rollups & Lonas — Tu imagen, en grande</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand: #1a1a2e;
+      --accent: #e94560;
+      --accent-hover: #c73652;
+      --light: #f5f5f7;
+      --mid: #d1d1d6;
+      --text: #1c1c1e;
+      --sub: #6e6e73;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #fff;
+      color: var(--text);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: url('img/fotoHero.jpeg') center/cover no-repeat;
+      color: #fff;
+      text-align: center;
+      padding: 80px 24px 60px;
+      position: relative;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(26,26,46,.75);
+    }
+    .hero > * { position: relative; }
+    .hero small {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      max-width: 720px;
+      margin: 0 auto 16px;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero p {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: rgba(255,255,255,.7);
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* ── MOCKUP SECTION ── */
+    .mockup-section {
+      background: var(--light);
+      padding: 64px 24px;
+    }
+    .mockup-section > h2 {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .mockup-section > .section-sub {
+      text-align: center;
+      color: var(--sub);
+      margin-bottom: 32px;
+      font-size: .95rem;
+    }
+
+    /* Format selector chips */
+    .format-selector {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+    .format-chip {
+      padding: 8px 20px;
+      border-radius: 24px;
+      border: 2px solid var(--mid);
+      background: #fff;
+      font-size: .9rem;
+      font-weight: 600;
+      color: var(--sub);
+      cursor: pointer;
+      transition: border-color .2s, background .2s, color .2s;
+    }
+    .format-chip:hover { border-color: var(--accent); color: var(--accent); }
+    .format-chip.active {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .mockup-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 40px;
+      align-items: center;
+      justify-content: center;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    /* Mockup stand container */
+    .mockup-wrap {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .stand-container {
+      position: relative;
+      width: 220px;
+    }
+    .stand-container svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .stand-container svg.hidden { display: none; }
+    /* Estructura uses fixed height so width grows with the banner aspect ratio */
+    .stand-container.format-fijo {
+      width: auto;
+    }
+    .stand-container.format-fijo svg {
+      height: 350px;
+      width: auto;
+    }
+
+    /* Preview overlay (image or PDF canvas) */
+    #preview-image, #preview-canvas {
+      position: absolute;
+      object-fit: cover;
+      border-radius: 2px;
+      display: none;
+      pointer-events: none;
+    }
+
+    #clear-btn {
+      display: none;
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(0,0,0,.55);
+      color: #fff;
+      font-size: 13px;
+      line-height: 1;
+      cursor: pointer;
+      z-index: 10;
+      transition: background .15s;
+    }
+    #clear-btn:hover { background: rgba(0,0,0,.8); }
+    .stand-container.has-preview #clear-btn { display: flex; align-items: center; justify-content: center; }
+
+    .mockup-label {
+      font-size: .8rem;
+      color: var(--sub);
+      text-align: center;
+    }
+    .mockup-desc {
+      font-size: .75rem;
+      color: #a0a0a8;
+      text-align: center;
+      max-width: 200px;
+    }
+    .grommet { cursor: default; }
+    #grommet-tip {
+      position: fixed;
+      background: rgba(0,0,0,.72);
+      color: #fff;
+      font-size: .75rem;
+      padding: 4px 9px;
+      border-radius: 5px;
+      pointer-events: none;
+      display: none;
+      z-index: 999;
+      white-space: nowrap;
+    }
+
+    /* Upload panel */
+    .upload-panel {
+      flex: 1 1 280px;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .upload-panel h3 { font-size: 1.1rem; font-weight: 700; }
+    .upload-panel p  { font-size: .9rem; color: var(--sub); line-height: 1.5; }
+
+    .upload-zone {
+      border: 2px dashed var(--mid);
+      border-radius: 12px;
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      background: #fff;
+      position: relative;
+    }
+    .upload-zone:hover, .upload-zone.drag { border-color: var(--accent); background: #fff5f7; }
+    .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .upload-icon { font-size: 2rem; margin-bottom: 8px; display: block; }
+    .upload-zone strong { display: block; font-size: .95rem; margin-bottom: 4px; }
+    .upload-zone span  { font-size: .8rem; color: var(--sub); }
+
+    /* CTA */
+    .btn-cta {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: background .2s, transform .1s;
+    }
+    .btn-cta:hover { background: var(--accent-hover); transform: translateY(-1px); }
+    .btn-cta:active { transform: translateY(0); }
+
+    /* ── FORMAT CONTROLS (inside upload panel) ── */
+    .format-controls { display: flex; flex-direction: column; gap: 8px; }
+    .format-control  { display: none; flex-direction: column; gap: 8px; }
+    .format-control.visible { display: flex; }
+    .control-label   { font-size: .78rem; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: .06em; }
+    .size-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+    .size-chip {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1.5px solid var(--mid);
+      background: #fff;
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--sub);
+      cursor: pointer;
+      transition: border-color .15s, background .15s, color .15s;
+    }
+    .size-chip:hover  { border-color: var(--accent); color: var(--accent); }
+    .size-chip.active { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .size-inputs {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: .88rem;
+      color: var(--sub);
+    }
+    .size-inputs label { display: flex; align-items: center; gap: 6px; }
+    .size-inputs input[type="number"] {
+      width: 68px;
+      padding: 5px 8px;
+      border: 1.5px solid var(--mid);
+      border-radius: 6px;
+      font-size: .95rem;
+      font-family: inherit;
+      text-align: center;
+      color: var(--text);
+      transition: border-color .15s;
+    }
+    .size-inputs input[type="number"]:focus { outline: none; border-color: var(--accent); }
+    .size-x { font-weight: 700; }
+
+    /* ── PRODUCTS SECTION ── */
+    .products-section {
+      padding: 72px 24px;
+      background: #fff;
+    }
+    .products-section > h2 {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .products-section > .section-sub {
+      text-align: center;
+      color: var(--sub);
+      font-size: .95rem;
+      margin-bottom: 48px;
+    }
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .product-card {
+      border-radius: 14px;
+      border: 1px solid var(--mid);
+      overflow: hidden;
+      transition: box-shadow .2s, transform .2s;
+      background: #fff;
+    }
+    .product-card:hover {
+      box-shadow: 0 8px 32px rgba(0,0,0,.10);
+      transform: translateY(-3px);
+    }
+    .card-photo {
+      aspect-ratio: 3/4;
+      background: #fff;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+    }
+    .card-photo img {
+      width: 100%; height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    /* placeholder shown when image fails or src is empty */
+    .card-photo::after {
+      content: attr(data-label);
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .8rem; color: var(--sub);
+      pointer-events: none;
+    }
+    .card-photo img[src]:not([src=""]) ~ * { display: none; }
+    .card-badge {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+    }
+    .card-body { padding: 20px; }
+    .card-body h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; }
+    .card-sizes {
+      font-size: .8rem;
+      color: var(--sub);
+      font-weight: 600;
+      letter-spacing: .02em;
+      margin-bottom: 10px;
+    }
+    .card-body p { font-size: .875rem; color: var(--sub); line-height: 1.55; }
+
+    /* ── FINAL CTA ── */
+    .final-cta {
+      background: var(--brand);
+      color: #fff;
+      text-align: center;
+      padding: 72px 24px;
+    }
+    .final-cta h2 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .final-cta p {
+      color: rgba(255,255,255,.7);
+      font-size: 1rem;
+      margin-bottom: 32px;
+    }
+    .btn-wa {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: #25D366;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 14px 28px;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: background .2s, transform .1s;
+    }
+    .btn-wa:hover  { background: #1ebe5a; transform: translateY(-2px); }
+    .btn-wa:active { transform: translateY(0); }
+    .btn-wa svg    { width: 22px; height: 22px; flex-shrink: 0; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 32px 24px;
+      font-size: .82rem;
+      color: var(--sub);
+      border-top: 1px solid var(--mid);
+    }
+
+    @media (max-width: 600px) {
+      .mockup-grid { flex-direction: column; align-items: center; }
+      .upload-panel { max-width: 100%; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <section class="hero">
+    <small>Impresión de alta calidad</small>
+    <h1>Imprimí tu<br><span>banner Roll-up</span></h1>
+    <p>También hacemos estructura rígida o lona para eventos, locales y promociones.</p>
+    <a href="https://wa.me/5491151090514?text=Hola%20Nico%20crack%2C%20te%20contacto%20para%20hacer%20una%20Lona%2C%20un%20Rollup%20o%20un%20banner%20con%20Estructura%21"
+       class="btn-wa" target="_blank" rel="noopener" style="margin-top:28px">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+        <path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.112 1.523 5.837L.057 23.882a.75.75 0 0 0 .924.924l6.044-1.466A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 0 1-5.006-1.371l-.36-.214-3.733.906.922-3.635-.233-.374A9.818 9.818 0 1 1 12 21.818z"/>
+      </svg>
+      Consulta sin compromiso
+    </a>
+  </section>
+
+  <!-- MOCKUP -->
+  <section class="mockup-section">
+    <h2>¿Cómo quedaría tu diseño?</h2>
+    <p class="section-sub">Elegí el formato, subí tu archivo y mirá cómo luce.</p>
+
+    <!-- Format chips -->
+    <div class="format-selector">
+      <button class="format-chip active" data-format="rollup">Rollup</button>
+      <button class="format-chip" data-format="fijo">Estructura</button>
+      <button class="format-chip" data-format="lona">Lona</button>
+    </div>
+
+    <div class="mockup-grid">
+
+      <!-- Mockup stand -->
+      <div class="mockup-wrap">
+        <div class="stand-container" id="stand-container">
+
+          <!-- Preview overlays (shared across all formats) -->
+          <img    id="preview-image"  alt="Tu diseño" />
+          <canvas id="preview-canvas"></canvas>
+          <button id="clear-btn" aria-label="Quitar diseño">✕</button>
+
+          <!-- ── ROLLUP SVG ── -->
+          <svg id="svg-rollup" viewBox="0 0 220 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Banner -->
+            <rect x="28" y="2" width="164" height="328" rx="2" fill="#e8e8ed" stroke="#c7c7cc" stroke-width="1.5"/>
+            <!-- Placeholder -->
+            <rect class="ph" x="28" y="2" width="164" height="328" rx="2" fill="#e8e8ed"/>
+            <text class="ph" x="110" y="158" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#aeaeb2">Tu diseño aquí</text>
+            <line class="ph" x1="70" y1="173" x2="150" y2="173" stroke="#c7c7cc" stroke-width="1"/>
+            <line class="ph" x1="85" y1="186" x2="135" y2="186" stroke="#c7c7cc" stroke-width="1"/>
+            <!-- Thin support pole behind banner -->
+            <rect x="108" y="2" width="4" height="328" fill="#888" opacity=".4"/>
+            <!-- Cassette box -->
+            <rect x="18" y="330" width="184" height="22" rx="5" fill="#3a3a3c"/>
+            <rect x="28" y="336" width="164" height="8" rx="3" fill="#555"/>
+            <!-- Feet -->
+            <rect x="10"  y="352" width="78" height="7" rx="3" fill="#3a3a3c"/>
+            <rect x="132" y="352" width="78" height="7" rx="3" fill="#3a3a3c"/>
+            <rect x="10"  y="357" width="22" height="5" rx="2" fill="#555"/>
+            <rect x="188" y="357" width="22" height="5" rx="2" fill="#555"/>
+          </svg>
+
+          <!-- ── SOPORTE FIJO SVG ── -->
+          <svg id="svg-fijo" class="hidden" viewBox="0 0 220 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Left pole -->
+            <rect x="20" y="5" width="7" height="308" rx="3" fill="#5a5a5e"/>
+            <!-- Right pole -->
+            <rect x="193" y="5" width="7" height="308" rx="3" fill="#5a5a5e"/>
+            <!-- Top crossbar -->
+            <rect x="17" y="5" width="186" height="7" rx="3" fill="#5a5a5e"/>
+            <!-- Bottom crossbar -->
+            <rect x="17" y="306" width="186" height="7" rx="3" fill="#5a5a5e"/>
+            <!-- Banner area -->
+            <rect x="27" y="12" width="166" height="294" rx="1" fill="#e8e8ed"/>
+            <!-- Placeholder -->
+            <rect class="ph" x="27" y="12" width="166" height="294" fill="#e8e8ed"/>
+            <text class="ph" x="110" y="156" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#aeaeb2">Tu diseño aquí</text>
+            <line class="ph" x1="70" y1="171" x2="150" y2="171" stroke="#c7c7cc" stroke-width="1"/>
+            <line class="ph" x1="85" y1="184" x2="135" y2="184" stroke="#c7c7cc" stroke-width="1"/>
+            <!-- Corner screws -->
+            <circle cx="24" cy="9"   r="3" fill="#888"/>
+            <circle cx="196" cy="9"  r="3" fill="#888"/>
+            <circle cx="24" cy="310" r="3" fill="#888"/>
+            <circle cx="196" cy="310" r="3" fill="#888"/>
+            <!-- Left leg -->
+            <line x1="23"  y1="313" x2="4"   y2="390" stroke="#5a5a5e" stroke-width="6" stroke-linecap="round"/>
+            <line x1="0"   y1="390" x2="28"  y2="390" stroke="#5a5a5e" stroke-width="5" stroke-linecap="round"/>
+            <!-- Right leg -->
+            <line x1="197" y1="313" x2="216" y2="390" stroke="#5a5a5e" stroke-width="6" stroke-linecap="round"/>
+            <line x1="192" y1="390" x2="220" y2="390" stroke="#5a5a5e" stroke-width="5" stroke-linecap="round"/>
+          </svg>
+
+          <!-- ── LONA SVG ── -->
+          <svg id="svg-lona" class="hidden" viewBox="0 0 220 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Hanging cords -->
+            <line x1="22"  y1="50" x2="5"   y2="5"  stroke="#bbb" stroke-width="1.5"/>
+            <line x1="110" y1="45" x2="110" y2="5"  stroke="#bbb" stroke-width="1.5"/>
+            <line x1="198" y1="50" x2="215" y2="5"  stroke="#bbb" stroke-width="1.5"/>
+            <!-- Horizontal rope at top -->
+            <line x1="5"   y1="5"  x2="215" y2="5"  stroke="#bbb" stroke-width="2" stroke-linecap="round"/>
+            <!-- Fabric -->
+            <rect x="10" y="45" width="200" height="300" rx="3" fill="#e8e8ed" stroke="#c7c7cc" stroke-width="2"/>
+            <!-- Reinforced hem -->
+            <rect x="10" y="45" width="200" height="300" rx="3" fill="none" stroke="#c0c0c8" stroke-width="7" opacity=".45"/>
+            <!-- Placeholder -->
+            <rect class="ph" x="18" y="53" width="184" height="284" fill="#e8e8ed"/>
+            <text class="ph" x="110" y="192" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#aeaeb2">Tu diseño aquí</text>
+            <line class="ph" x1="70" y1="207" x2="150" y2="207" stroke="#c7c7cc" stroke-width="1"/>
+            <line class="ph" x1="85" y1="220" x2="135" y2="220" stroke="#c7c7cc" stroke-width="1"/>
+            <!-- Grommets top row -->
+            <circle cx="22"  cy="50"  r="5.5" fill="#888" stroke="#555" stroke-width="1.5"/>
+            <circle cx="22"  cy="50"  r="2"   fill="#555"/>
+            <circle cx="110" cy="47"  r="5.5" fill="#888" stroke="#555" stroke-width="1.5"/>
+            <circle cx="110" cy="47"  r="2"   fill="#555"/>
+            <circle cx="198" cy="50"  r="5.5" fill="#888" stroke="#555" stroke-width="1.5"/>
+            <circle cx="198" cy="50"  r="2"   fill="#555"/>
+            <!-- Grommets middle -->
+            <circle cx="13"  cy="195" r="5.5" fill="#888" stroke="#555" stroke-width="1.5"/>
+            <circle cx="13"  cy="195" r="2"   fill="#555"/>
+            <circle cx="207" cy="195" r="5.5" fill="#888" stroke="#555" stroke-width="1.5"/>
+            <circle cx="207" cy="195" r="2"   fill="#555"/>
+            <!-- Grommets bottom row -->
+            <circle cx="22"  cy="340" r="5.5" fill="#888" stroke="#555" stroke-width="1.5"/>
+            <circle cx="22"  cy="340" r="2"   fill="#555"/>
+            <circle cx="110" cy="343" r="5.5" fill="#888" stroke="#555" stroke-width="1.5"/>
+            <circle cx="110" cy="343" r="2"   fill="#555"/>
+            <circle cx="198" cy="340" r="5.5" fill="#888" stroke="#555" stroke-width="1.5"/>
+            <circle cx="198" cy="340" r="2"   fill="#555"/>
+          </svg>
+
+        </div>
+        <span class="mockup-label" id="mockup-label">Rollup 80×200 cm</span>
+        <span class="mockup-desc"  id="mockup-desc">El más cómodo — se despliega en segundos</span>
+      </div>
+
+      <!-- Upload + CTA -->
+      <div class="upload-panel">
+        <div>
+          <h3>Probá tu diseño</h3>
+          <p>Subí tu archivo y mirá cómo luce en el formato elegido antes de consultar.</p>
+        </div>
+
+        <!-- Format-specific controls -->
+        <div class="format-controls">
+          <div class="format-control" id="ctrl-fijo">
+            <span class="control-label">Tamaño</span>
+            <div class="size-chips">
+              <button class="size-chip active" data-w="85"  data-h="200">85×200 cm</button>
+              <button class="size-chip"        data-w="300" data-h="200">300×200 cm</button>
+            </div>
+          </div>
+          <div class="format-control" id="ctrl-lona">
+            <span class="control-label">Medidas</span>
+            <div class="size-inputs">
+              <label>Ancho <input type="number" id="lona-w" value="400" min="20" max="800" /> cm</label>
+              <span class="size-x">×</span>
+              <label>Alto <input type="number" id="lona-h" value="300" min="20" max="800" /> cm</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="upload-zone" id="drop-zone">
+          <input type="file" id="file-input" accept="image/*,application/pdf" />
+          <span class="upload-icon">🖼️</span>
+          <strong>Arrastrá o hacé clic para subir</strong>
+          <span>PNG, JPG, SVG o PDF · Hasta 10 MB</span>
+        </div>
+
+        <a href="https://wa.me/5491151090514?text=Hola%20Nico%20crack%2C%20te%20contacto%20para%20hacer%20una%20Lona%2C%20un%20Rollup%20o%20un%20banner%20con%20Estructura%21"
+           class="btn-wa"
+           target="_blank"
+           rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.112 1.523 5.837L.057 23.882a.75.75 0 0 0 .924.924l6.044-1.466A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 0 1-5.006-1.371l-.36-.214-3.733.906.922-3.635-.233-.374A9.818 9.818 0 1 1 12 21.818z"/>
+          </svg>
+          Consultar presupuesto
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section class="products-section">
+    <h2>Nuestros formatos</h2>
+    <p class="section-sub">Tres opciones para cada necesidad — todos con impresión de alta calidad.</p>
+
+    <div class="products-grid">
+
+      <!-- Rollup -->
+      <div class="product-card">
+        <div class="card-photo">
+          <img src="img/rollup.png" alt="Banner rollup" />
+        </div>
+        <div class="card-body">
+          <div class="card-badge">Más elegido</div>
+          <h3>Rollup</h3>
+          <div class="card-sizes">85×200 cm</div>
+          <p>Soporte con cassette en la base. Se despliega en segundos y se guarda en una bolsa. Ideal para ferias, eventos y presentaciones.</p>
+        </div>
+      </div>
+
+      <!-- Estructura -->
+      <div class="product-card">
+        <div class="card-photo">
+          <img src="img/estructura.jpg" alt="Soporte estructura" />
+        </div>
+        <div class="card-body">
+          <h3>Estructura</h3>
+          <div class="card-sizes">85×200 cm &nbsp;·&nbsp; 300×200 cm</div>
+          <p>Marco metálico rígido con patas. Resistente y estable, perfecto para uso fijo en locales, showrooms e interiores.</p>
+        </div>
+      </div>
+
+      <!-- Lona -->
+      <div class="product-card">
+        <div class="card-photo">
+          <img src="img/lona.png" alt="Lona con arandelas" />
+        </div>
+        <div class="card-body">
+          <h3>Lona con arandelas</h3>
+          <div class="card-sizes">Medidas a pedido</div>
+          <p>Tela con arandelas metálicas para colgar con hilos. Ideal para fachadas, exteriores y grandes formatos personalizados.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div id="grommet-tip">Arandela</div>
+
+  <!-- FINAL CTA -->
+  <section class="final-cta">
+    <h2>¿Listo para imprimir?</h2>
+    <p>Escribinos y te damos precio al instante.</p>
+    <a href="https://wa.me/5491151090514?text=Hola%20Nico%20crack%2C%20te%20contacto%20para%20hacer%20una%20Lona%2C%20un%20Rollup%20o%20un%20banner%20con%20Estructura%21"
+       class="btn-wa" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+        <path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.112 1.523 5.837L.057 23.882a.75.75 0 0 0 .924.924l6.044-1.466A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 0 1-5.006-1.371l-.36-.214-3.733.906.922-3.635-.233-.374A9.818 9.818 0 1 1 12 21.818z"/>
+      </svg>
+      Consulta sin compromiso
+    </a>
+  </section>
+
+  <footer>
+    &copy; 2026 Rollups &amp; Lonas · Todos los derechos reservados
+  </footer>
+
+  <script type="module">
+    import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs';
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
+
+    // ── Format definitions ──────────────────────────────────────────────────
+    // preview coords are in SVG user-units (viewBox = 220×420 for all),
+    // which map 1:1 to CSS px when the SVG is rendered at 220 px wide.
+    const FORMATS = {
+      rollup: {
+        svg:   'svg-rollup',
+        label: 'Rollup — 85×200 cm',
+        desc:  'El más cómodo — se despliega en segundos',
+        p: { left: 28, top: 2, width: 164, height: 328 }
+      },
+      fijo: {
+        svg:   'svg-fijo',
+        label: 'Estructura — 85×200 cm · 300×200 cm',
+        desc:  'Marco metálico rígido, ideal para uso fijo',
+        p: { left: 27, top: 12, width: 166, height: 294 }
+      },
+      lona: {
+        svg:   'svg-lona',
+        label: 'Lona con arandelas — medidas a pedido',
+        desc:  'Se cuelga con hilos — perfecta para exteriores',
+        p: { left: 10, top: 45, width: 200, height: 300 }
+      }
+    };
+
+    let activeFormat = 'rollup';
+    let currentFile  = null;
+
+    const previewImg     = document.getElementById('preview-image');
+    const previewCanvas  = document.getElementById('preview-canvas');
+    const clearBtn       = document.getElementById('clear-btn');
+    const standContainer = document.getElementById('stand-container');
+    const labelEl        = document.getElementById('mockup-label');
+    const descEl         = document.getElementById('mockup-desc');
+    const fileInput      = document.getElementById('file-input');
+    const dropZone       = document.getElementById('drop-zone');
+    const ctrlFijo       = document.getElementById('ctrl-fijo');
+    const ctrlLona       = document.getElementById('ctrl-lona');
+    const lonaWInput     = document.getElementById('lona-w');
+    const lonaHInput     = document.getElementById('lona-h');
+
+    // ── Estructura shape renderer ─────────────────────────────────────────────────
+    // Height is the fixed axis (both sizes are 200cm tall → same rendered height).
+    // Width grows with the banner, so 300×200 appears visually wider.
+    const CANO_RENDER_H = 350; // px — fixed rendered height
+    const CANO_H_SCALE  = 1.25; // SVG units per cm
+
+    function renderCanoShape(wCm, hCm) {
+      const FRAME = 7, TOP = 8, LEG = 65;
+      const BW  = Math.round(wCm * CANO_H_SCALE);
+      const BH  = Math.round(hCm * CANO_H_SCALE);
+      const VBW = BW + FRAME * 2 + 16;   // viewBox width
+      const VBH = BH + FRAME * 2 + LEG + 16; // viewBox height (fixed for same hCm)
+      const cx  = VBW / 2;
+      const x   = Math.round(cx - BW / 2);
+      const fL  = x - FRAME, fR = x + BW;
+      const legY = TOP + BH + FRAME * 2 + LEG;
+      const phCy = TOP + FRAME + (BH - FRAME) / 2;
+
+      // px scale: how many px per SVG unit when SVG renders at CANO_RENDER_H
+      const pxScale = CANO_RENDER_H / VBH;
+
+      const svg = document.getElementById('svg-fijo');
+      svg.setAttribute('viewBox', `0 0 ${VBW} ${VBH}`);
+      svg.innerHTML = `
+        <rect x="${fL}"   y="${TOP}"     width="${FRAME}"    height="${BH+FRAME}" rx="3" fill="#5a5a5e"/>
+        <rect x="${fR}"   y="${TOP}"     width="${FRAME}"    height="${BH+FRAME}" rx="3" fill="#5a5a5e"/>
+        <rect x="${fL}"   y="${TOP}"     width="${BW+FRAME*2}" height="${FRAME}"  rx="3" fill="#5a5a5e"/>
+        <rect x="${fL}"   y="${TOP+BH}"  width="${BW+FRAME*2}" height="${FRAME}"  rx="3" fill="#5a5a5e"/>
+        <rect x="${x}"    y="${TOP+FRAME}" width="${BW}"     height="${BH-FRAME}" rx="1" fill="#e8e8ed"/>
+        <rect class="ph" x="${x}" y="${TOP+FRAME}" width="${BW}" height="${BH-FRAME}" fill="#e8e8ed"/>
+        <text class="ph" x="${cx}" y="${phCy+5}" text-anchor="middle" font-family="sans-serif" font-size="${Math.min(18, BW/8)}" fill="#aeaeb2">Tu diseño aquí</text>
+        <line class="ph" x1="${cx-40}" y1="${phCy+20}" x2="${cx+40}" y2="${phCy+20}" stroke="#c7c7cc" stroke-width="1"/>
+        <circle cx="${fL+3}" cy="${TOP+4}"    r="3" fill="#888"/>
+        <circle cx="${fR+4}" cy="${TOP+4}"    r="3" fill="#888"/>
+        <circle cx="${fL+3}" cy="${TOP+BH+3}" r="3" fill="#888"/>
+        <circle cx="${fR+4}" cy="${TOP+BH+3}" r="3" fill="#888"/>
+        <line x1="${fL+3}" y1="${TOP+BH+FRAME*2}" x2="${fL-20}"   y2="${legY}" stroke="#5a5a5e" stroke-width="6" stroke-linecap="round"/>
+        <line x1="${fL-24}" y1="${legY}" x2="${fL+10}" y2="${legY}" stroke="#5a5a5e" stroke-width="5" stroke-linecap="round"/>
+        <line x1="${fR+4}" y1="${TOP+BH+FRAME*2}" x2="${fR+20}"   y2="${legY}" stroke="#5a5a5e" stroke-width="6" stroke-linecap="round"/>
+        <line x1="${fR-10}" y1="${legY}" x2="${fR+24}" y2="${legY}" stroke="#5a5a5e" stroke-width="5" stroke-linecap="round"/>
+      `;
+
+      // Store pixel positions for the preview overlay
+      FORMATS.fijo.p = {
+        left:   Math.round(x         * pxScale),
+        top:    Math.round((TOP + FRAME) * pxScale),
+        width:  Math.round(BW        * pxScale),
+        height: Math.round((BH - FRAME) * pxScale)
+      };
+
+      if (activeFormat === 'fijo') {
+        positionOverlay(FORMATS.fijo.p);
+        if (currentFile) applyFile(currentFile);
+      }
+    }
+
+    // ── Lona shape renderer ─────────────────────────────────────────────────
+    // Each axis is independent: wCm → BW (left/right), hCm → BH (up/down).
+    // ViewBox height is fixed so the SVG container doesn't jump.
+    function renderLonaShape(wCm, hCm) {
+      const TOP = 45, VH = 365;                          // fixed viewBox
+      const BW  = Math.round(Math.min(200, Math.max(40, wCm)));
+      const BH  = Math.round(Math.min(300, Math.max(40, hCm)));
+      const x   = Math.round((220 - BW) / 2);           // centered
+      const cx  = x + BW / 2;
+      const gBot  = TOP + BH;
+      const gMid  = TOP + BH / 2;
+      const showMid = BH >= 80;
+      const phCy  = TOP + BH / 2;
+
+      const svg = document.getElementById('svg-lona');
+      svg.setAttribute('viewBox', `0 0 220 ${VH}`);
+      svg.innerHTML = `
+        <line x1="${x}"    y1="${TOP}"     x2="${Math.max(0, x - 17)}"  y2="5" stroke="#bbb" stroke-width="1.5"/>
+        <line x1="${cx}"   y1="${TOP - 3}" x2="${cx}"  y2="5" stroke="#bbb" stroke-width="1.5"/>
+        <line x1="${x+BW}" y1="${TOP}"     x2="${Math.min(220, x+BW+17)}" y2="5" stroke="#bbb" stroke-width="1.5"/>
+        <line x1="${Math.max(0,x-17)}" y1="5" x2="${Math.min(220,x+BW+17)}" y2="5" stroke="#bbb" stroke-width="2" stroke-linecap="round"/>
+        <rect x="${x}" y="${TOP}" width="${BW}" height="${BH}" rx="3" fill="#e8e8ed" stroke="#c7c7cc" stroke-width="2"/>
+        <rect x="${x}" y="${TOP}" width="${BW}" height="${BH}" rx="3" fill="none" stroke="#c0c0c8" stroke-width="7" opacity=".45"/>
+        <rect class="ph" x="${x+8}" y="${TOP+8}" width="${BW-16}" height="${BH-16}" fill="#e8e8ed"/>
+        <text class="ph" x="${cx}" y="${phCy+5}" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#aeaeb2">Tu diseño aquí</text>
+        <line class="ph" x1="${cx-40}" y1="${phCy+18}" x2="${cx+40}" y2="${phCy+18}" stroke="#c7c7cc" stroke-width="1"/>
+        <line class="ph" x1="${cx-25}" y1="${phCy+31}" x2="${cx+25}" y2="${phCy+31}" stroke="#c7c7cc" stroke-width="1"/>
+        ${[
+          [x,    TOP  ],
+          [cx,   TOP-3],
+          [x+BW, TOP  ],
+          ...(showMid ? [[x, gMid],[x+BW, gMid]] : []),
+          [x,    gBot  ],
+          [cx,   gBot+3],
+          [x+BW, gBot  ]
+        ].map(([gx,gy]) => `<g class="grommet"><circle cx="${gx}" cy="${gy}" r="5.5" fill="#888" stroke="#555" stroke-width="1.5"/><circle cx="${gx}" cy="${gy}" r="2" fill="#555"/></g>`).join('')}
+      `;
+
+      FORMATS.lona.p = { left: x, top: TOP, width: BW, height: BH };
+      if (activeFormat === 'lona') {
+        positionOverlay(FORMATS.lona.p);
+        if (currentFile) applyFile(currentFile);
+      }
+    }
+
+    // ── Switch format ───────────────────────────────────────────────────────
+    function switchFormat(key) {
+      const prev = FORMATS[activeFormat];
+      document.getElementById(prev.svg).classList.add('hidden');
+
+      activeFormat = key;
+      const fmt = FORMATS[key];
+      document.getElementById(fmt.svg).classList.remove('hidden');
+
+      labelEl.textContent   = fmt.label;
+      descEl.textContent    = fmt.desc;
+
+      ctrlFijo.classList.toggle('visible', key === 'fijo');
+      ctrlLona.classList.toggle('visible', key === 'lona');
+      standContainer.classList.toggle('format-fijo', key === 'fijo');
+
+      document.querySelectorAll('.format-chip').forEach(c =>
+        c.classList.toggle('active', c.dataset.format === key)
+      );
+
+      positionOverlay(fmt.p);
+      if (currentFile) applyFile(currentFile);
+    }
+
+    function positionOverlay({ left, top, width, height }) {
+      [previewImg, previewCanvas].forEach(el => {
+        el.style.left   = left   + 'px';
+        el.style.top    = top    + 'px';
+        el.style.width  = width  + 'px';
+        el.style.height = height + 'px';
+      });
+    }
+
+    // Set initial position
+    positionOverlay(FORMATS.rollup.p);
+
+    // ── Placeholders & clear ────────────────────────────────────────────────
+    function hidePlaceholders() {
+      document.querySelectorAll('.ph').forEach(el => el.style.display = 'none');
+      standContainer.classList.add('has-preview');
+    }
+    function showPlaceholders() {
+      document.querySelectorAll('.ph').forEach(el => el.style.display = '');
+      standContainer.classList.remove('has-preview');
+    }
+
+    clearBtn.addEventListener('click', () => {
+      previewImg.style.display    = 'none';
+      previewImg.src              = '';
+      previewCanvas.style.display = 'none';
+      fileInput.value             = '';
+      currentFile                 = null;
+      showPlaceholders();
+    });
+
+    // ── Apply file ──────────────────────────────────────────────────────────
+    async function applyFile(file) {
+      if (!file) return;
+      currentFile = file;
+
+      if (file.type === 'application/pdf') {
+        previewImg.style.display = 'none';
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf  = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const page = await pdf.getPage(1);
+        const fmt  = FORMATS[activeFormat];
+        const vp0  = page.getViewport({ scale: 1 });
+        const scale = Math.max(fmt.p.width / vp0.width, fmt.p.height / vp0.height);
+        const vp   = page.getViewport({ scale });
+        previewCanvas.width  = vp.width;
+        previewCanvas.height = vp.height;
+        await page.render({ canvasContext: previewCanvas.getContext('2d'), viewport: vp }).promise;
+        previewCanvas.style.display = 'block';
+        hidePlaceholders();
+        return;
+      }
+
+      if (file.type.startsWith('image/')) {
+        previewCanvas.style.display = 'none';
+        previewImg.src = URL.createObjectURL(file);
+        previewImg.style.display = 'block';
+        hidePlaceholders();
+      }
+    }
+
+    // ── Init shapes ──────────────────────────────────────────────────────────
+    renderCanoShape(85, 200);
+    renderLonaShape(+lonaWInput.value, +lonaHInput.value);
+
+    // ── Format chip clicks ───────────────────────────────────────────────────
+    document.querySelectorAll('.format-chip').forEach(chip => {
+      chip.addEventListener('click', () => switchFormat(chip.dataset.format));
+    });
+
+    // ── Estructura size chip clicks ────────────────────────────────────────────────
+    ctrlFijo.querySelectorAll('.size-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        ctrlFijo.querySelectorAll('.size-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        renderCanoShape(+chip.dataset.w, +chip.dataset.h);
+        const label = `Estructura — ${chip.dataset.w}×${chip.dataset.h} cm`;
+        labelEl.textContent = label;
+        FORMATS.fijo.label  = label;
+      });
+    });
+
+    // ── Grommet tooltip ──────────────────────────────────────────────────────
+    const grommetTip = document.getElementById('grommet-tip');
+    const svgLona    = document.getElementById('svg-lona');
+    svgLona.addEventListener('mouseover', e => {
+      if (e.target.closest('.grommet')) grommetTip.style.display = 'block';
+    });
+    svgLona.addEventListener('mousemove', e => {
+      if (grommetTip.style.display === 'block') {
+        grommetTip.style.left = (e.clientX + 12) + 'px';
+        grommetTip.style.top  = (e.clientY - 30) + 'px';
+      }
+    });
+    svgLona.addEventListener('mouseout', e => {
+      if (e.target.closest('.grommet')) grommetTip.style.display = 'none';
+    });
+
+    // ── Lona size inputs ─────────────────────────────────────────────────────
+    [lonaWInput, lonaHInput].forEach(input => {
+      input.addEventListener('input', () => {
+        const w = Math.max(20, +lonaWInput.value || 100);
+        const h = Math.max(20, +lonaHInput.value || 150);
+        renderLonaShape(w, h);
+      });
+    });
+
+    // ── File input ──────────────────────────────────────────────────────────
+    fileInput.addEventListener('change', () => applyFile(fileInput.files[0]));
+
+    dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag'); });
+    dropZone.addEventListener('dragleave', ()  => dropZone.classList.remove('drag'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('drag');
+      applyFile(e.dataTransfer.files[0]);
+    });
+  </script>
+
+</body>
+</html>
