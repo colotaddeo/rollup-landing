@@ -955,6 +955,11 @@
     // ── File input ──────────────────────────────────────────────────────────
     fileInput.addEventListener('change', () => applyFile(fileInput.files[0]));
 
+    standContainer.addEventListener('click', e => {
+      if (!e.target.closest('#clear-btn') && !e.target.closest('.grommet')) fileInput.click();
+    });
+    standContainer.style.cursor = 'pointer';
+
     dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag'); });
     dropZone.addEventListener('dragleave', ()  => dropZone.classList.remove('drag'));
     dropZone.addEventListener('drop', e => {
