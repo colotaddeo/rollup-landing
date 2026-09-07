@@ -294,6 +294,44 @@
     .size-inputs input[type="number"]:focus { outline: none; border-color: var(--accent); }
     .size-x { font-weight: 700; }
 
+    /* ── PDF DIM WARNING ── */
+    #pdf-dim-warning {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: #fff8e6;
+      border: 1px solid #f0c040;
+      border-radius: 8px;
+      font-size: .82rem;
+      color: #7a5c00;
+      flex-wrap: wrap;
+    }
+    #pdf-dim-warning span { flex: 1; min-width: 0; }
+    #rotate-btn {
+      flex-shrink: 0;
+      padding: 5px 12px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    #rotate-btn:hover { background: var(--accent-hover); }
+
+    #pdf-pages-notice {
+      display: none;
+      padding: 8px 14px;
+      background: #f0f4ff;
+      border: 1px solid #b0c4f8;
+      border-radius: 8px;
+      font-size: .82rem;
+      color: #2c4ea0;
+    }
+
     /* ── PRODUCTS SECTION ── */
     .products-section {
       padding: 72px 24px;
@@ -452,6 +490,97 @@
       border-top: 1px solid var(--mid);
     }
 
+    /* ── PLAY BUTTON ── */
+    #play-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 14px;
+      padding: 7px 14px;
+      border-radius: 20px;
+      border: 1.5px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      font-size: .82rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      position: relative;
+      overflow: hidden;
+    }
+    #play-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--accent);
+      width: 0%;
+      z-index: 0;
+      transition: none;
+    }
+    #play-btn.filling::before {
+      width: 100%;
+      transition: width 2s linear;
+    }
+    #play-btn svg,
+    #play-btn span {
+      position: relative;
+      z-index: 1;
+    }
+    #play-btn:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+    #play-btn.filled {
+      color: #fff;
+    }
+
+    /* ── VIDEO MODAL ── */
+    #video-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.82);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    #video-modal.open { display: flex; }
+    #video-modal-inner {
+      position: relative;
+      width: min(90vw, 480px);
+      max-height: calc(100vh - 80px);
+      background: #000;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,.6);
+    }
+    #video-modal video {
+      width: 100%;
+      max-height: calc(100vh - 80px);
+      display: block;
+      object-fit: contain;
+    }
+    #video-modal-close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: rgba(0,0,0,.5);
+      border: none;
+      color: #fff;
+      font-size: 18px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s;
+      z-index: 10;
+    }
+    #video-modal-close:hover { background: rgba(0,0,0,.75); }
+
     @media (max-width: 600px) {
       .mockup-grid { flex-direction: column; align-items: center; }
       .upload-panel { max-width: 100%; width: 100%; }
@@ -492,6 +621,10 @@
           <h3>Rollup</h3>
           <div class="card-sizes">85×200 cm</div>
           <p>Soporte con cassette en la base. Se despliega en segundos y se guarda en una bolsa. Ideal para ferias, eventos y presentaciones.</p>
+          <button id="play-btn">
+            <svg style="position:relative;z-index:1" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            <span style="position:relative;z-index:1">Ver cómo funciona</span>
+          </button>
         </div>
       </div>
 
@@ -544,6 +677,7 @@
           <img    id="preview-image"  alt="Tu diseño" />
           <canvas id="preview-canvas"></canvas>
           <button id="clear-btn" aria-label="Quitar diseño">✕</button>
+
 
           <!-- ── ROLLUP SVG ── -->
           <svg id="svg-rollup" viewBox="0 0 220 420" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -666,10 +800,18 @@
         </div>
 
         <div class="upload-zone" id="drop-zone">
-          <input type="file" id="file-input" accept="image/*,application/pdf" />
+          <input type="file" id="file-input" accept="application/pdf" />
           <span class="upload-icon">🖼️</span>
           <strong>Arrastrá o hacé clic para subir</strong>
-          <span>PNG, JPG, SVG o PDF · Hasta 10 MB</span>
+          <span>PDF · Hasta 10 MB</span>
+        </div>
+
+        <div id="pdf-pages-notice"></div>
+
+        <div id="pdf-dim-warning">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b8860b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" flex-shrink="0" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span id="pdf-dim-text"></span>
+          <button id="rotate-btn" style="display:none">↻ Girar 90°</button>
         </div>
 
         <a id="cta-presupuesto"
@@ -716,6 +858,14 @@
   </section>
 
 
+  <!-- VIDEO MODAL -->
+  <div id="video-modal" role="dialog" aria-modal="true" aria-label="Cómo funciona el rollup">
+    <div id="video-modal-inner">
+      <button id="video-modal-close" aria-label="Cerrar">✕</button>
+      <video id="rollup-video" src="img/video funcionamiento Rollup.mp4" controls playsinline autoplay muted></video>
+    </div>
+  </div>
+
   <script type="module">
     import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs';
     pdfjsLib.GlobalWorkerOptions.workerSrc =
@@ -745,8 +895,10 @@
       }
     };
 
-    let activeFormat = 'rollup';
-    let currentFile  = null;
+    let activeFormat   = 'rollup';
+    let currentFile    = null;
+    let currentPdfPage = null;
+    let pdfRotation    = 0;
 
     const previewImg     = document.getElementById('preview-image');
     const previewCanvas  = document.getElementById('preview-canvas');
@@ -757,6 +909,10 @@
     const fileInput      = document.getElementById('file-input');
     const dropZone       = document.getElementById('drop-zone');
     const ctaPresupuesto = document.getElementById('cta-presupuesto');
+    const pagesNotice    = document.getElementById('pdf-pages-notice');
+    const dimWarning     = document.getElementById('pdf-dim-warning');
+    const dimText        = document.getElementById('pdf-dim-text');
+    const rotateBtn      = document.getElementById('rotate-btn');
     const ctrlFijo       = document.getElementById('ctrl-fijo');
     const ctrlLona       = document.getElementById('ctrl-lona');
     const lonaWInput     = document.getElementById('lona-w');
@@ -814,7 +970,8 @@
 
       if (activeFormat === 'fijo') {
         positionOverlay(FORMATS.fijo.p);
-        if (currentFile) applyFile(currentFile);
+        if (currentPdfPage) { renderPdfPage().then(checkPdfDimensions); }
+        else if (currentFile) { applyFile(currentFile); }
       }
     }
 
@@ -859,7 +1016,8 @@
       FORMATS.lona.p = { left: x, top: TOP, width: BW, height: BH };
       if (activeFormat === 'lona') {
         positionOverlay(FORMATS.lona.p);
-        if (currentFile) applyFile(currentFile);
+        if (currentPdfPage) { renderPdfPage().then(checkPdfDimensions); }
+        else if (currentFile) { applyFile(currentFile); }
       }
     }
 
@@ -884,7 +1042,8 @@
       );
 
       positionOverlay(fmt.p);
-      if (currentFile) applyFile(currentFile);
+      if (currentPdfPage) { renderPdfPage().then(checkPdfDimensions); }
+      else if (currentFile) { applyFile(currentFile); }
       else updateCtaLink();
     }
 
@@ -922,11 +1081,13 @@
       standContainer.classList.add('has-preview');
       updateCtaLink();
       ctaPresupuesto.style.display = 'flex';
+      dropZone.style.display = 'none';
     }
     function showPlaceholders() {
       document.querySelectorAll('.ph').forEach(el => el.style.display = '');
       standContainer.classList.remove('has-preview');
       ctaPresupuesto.style.display = 'none';
+      dropZone.style.display = '';
     }
 
     clearBtn.addEventListener('click', () => {
@@ -935,37 +1096,85 @@
       previewCanvas.style.display = 'none';
       fileInput.value             = '';
       currentFile                 = null;
+      currentPdfPage              = null;
+      pdfRotation                 = 0;
+      dimWarning.style.display    = 'none';
+      pagesNotice.style.display   = 'none';
       showPlaceholders();
+    });
+
+    // ── PDF helpers ─────────────────────────────────────────────────────────
+    const PT_TO_CM = 2.54 / 72;
+    const DIM_TOL  = 5;
+
+    function getExpectedDimsCm() {
+      if (activeFormat === 'rollup') return { w: 85, h: 200 };
+      if (activeFormat === 'fijo') {
+        const chip = ctrlFijo.querySelector('.size-chip.active');
+        return chip ? { w: +chip.dataset.w, h: +chip.dataset.h } : { w: 85, h: 200 };
+      }
+      return { w: +lonaWInput.value, h: +lonaHInput.value };
+    }
+
+    async function renderPdfPage() {
+      const fmt  = FORMATS[activeFormat];
+      const vp0  = currentPdfPage.getViewport({ scale: 1, rotation: pdfRotation });
+      const scale = Math.max(fmt.p.width / vp0.width, fmt.p.height / vp0.height);
+      const vp   = currentPdfPage.getViewport({ scale, rotation: pdfRotation });
+      previewCanvas.width  = vp.width;
+      previewCanvas.height = vp.height;
+      await currentPdfPage.render({ canvasContext: previewCanvas.getContext('2d'), viewport: vp }).promise;
+      previewCanvas.style.display = 'block';
+      hidePlaceholders();
+    }
+
+    function checkPdfDimensions() {
+      if (!currentPdfPage) return;
+      const vp0  = currentPdfPage.getViewport({ scale: 1, rotation: pdfRotation });
+      const pdfW = +(vp0.width  * PT_TO_CM).toFixed(1);
+      const pdfH = +(vp0.height * PT_TO_CM).toFixed(1);
+      const exp  = getExpectedDimsCm();
+      const ok   = d => Math.abs(d) <= DIM_TOL;
+
+      if (ok(pdfW - exp.w) && ok(pdfH - exp.h)) {
+        dimWarning.style.display = 'none';
+        return;
+      }
+      const isRotated = ok(pdfW - exp.h) && ok(pdfH - exp.w);
+      dimText.textContent = isRotated
+        ? `Tu PDF está girado — es ${pdfW}×${pdfH} cm, el formato espera ${exp.w}×${exp.h} cm`
+        : `Tu PDF es ${pdfW}×${pdfH} cm — el formato espera ${exp.w}×${exp.h} cm`;
+      rotateBtn.style.display = isRotated ? 'inline-flex' : 'none';
+      dimWarning.style.display = 'flex';
+    }
+
+    rotateBtn.addEventListener('click', async () => {
+      pdfRotation = (pdfRotation + 90) % 360;
+      await renderPdfPage();
+      checkPdfDimensions();
     });
 
     // ── Apply file ──────────────────────────────────────────────────────────
     async function applyFile(file) {
       if (!file) return;
-      currentFile = file;
+      currentFile    = file;
+      pdfRotation    = 0;
+      dimWarning.style.display = 'none';
 
       if (file.type === 'application/pdf') {
         previewImg.style.display = 'none';
-        const arrayBuffer = await file.arrayBuffer();
-        const pdf  = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        const page = await pdf.getPage(1);
-        const fmt  = FORMATS[activeFormat];
-        const vp0  = page.getViewport({ scale: 1 });
-        const scale = Math.max(fmt.p.width / vp0.width, fmt.p.height / vp0.height);
-        const vp   = page.getViewport({ scale });
-        previewCanvas.width  = vp.width;
-        previewCanvas.height = vp.height;
-        await page.render({ canvasContext: previewCanvas.getContext('2d'), viewport: vp }).promise;
-        previewCanvas.style.display = 'block';
-        hidePlaceholders();
+        const arrayBuffer  = await file.arrayBuffer();
+        const pdf          = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        currentPdfPage     = await pdf.getPage(1);
+        pagesNotice.textContent = pdf.numPages > 1
+          ? `ℹ️ Tu PDF tiene ${pdf.numPages} páginas — solo se muestra la primera en el ejemplo.`
+          : '';
+        pagesNotice.style.display = pdf.numPages > 1 ? 'block' : 'none';
+        await renderPdfPage();
+        checkPdfDimensions();
         return;
       }
 
-      if (file.type.startsWith('image/')) {
-        previewCanvas.style.display = 'none';
-        previewImg.src = URL.createObjectURL(file);
-        previewImg.style.display = 'block';
-        hidePlaceholders();
-      }
     }
 
     // ── Init shapes ──────────────────────────────────────────────────────────
@@ -987,6 +1196,7 @@
         labelEl.textContent = label;
         FORMATS.fijo.label  = label;
         updateCtaLink();
+        checkPdfDimensions();
       });
     });
 
@@ -1013,6 +1223,7 @@
         const h = Math.max(20, +lonaHInput.value || 150);
         renderLonaShape(w, h);
         updateCtaLink();
+        checkPdfDimensions();
       });
     });
 
@@ -1031,6 +1242,61 @@
       dropZone.classList.remove('drag');
       applyFile(e.dataTransfer.files[0]);
     });
+
+    // ── Video modal ──────────────────────────────────────────────────────────
+    const playBtn    = document.getElementById('play-btn');
+    const videoModal = document.getElementById('video-modal');
+    const videoEl    = document.getElementById('rollup-video');
+    const modalClose = document.getElementById('video-modal-close');
+
+    let fillTriggered = false;
+    let fillTimer = null;
+
+    function openModal() {
+      videoModal.classList.add('open');
+      videoEl.play();
+    }
+
+    function closeModal() {
+      videoModal.classList.remove('open');
+      videoEl.pause();
+      videoEl.currentTime = 0;
+      // marcar como disparado para no reanimar
+      fillTriggered = true;
+      clearTimeout(fillTimer);
+      playBtn.classList.remove('filling');
+      playBtn.classList.add('filled');
+    }
+
+    // IntersectionObserver: arranca el fill al entrar al viewport
+    const fillObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !fillTriggered) {
+          fillTriggered = true;
+          fillObserver.unobserve(playBtn);
+          playBtn.classList.add('filling');
+          fillTimer = setTimeout(openModal, 2000);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    fillObserver.observe(playBtn);
+
+    // click manual: abre de inmediato y cancela el timer si estaba corriendo
+    playBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      fillTriggered = true;
+      fillObserver.unobserve(playBtn);
+      clearTimeout(fillTimer);
+      fillTimer = null;
+      playBtn.classList.remove('filling');
+      playBtn.classList.add('filled');
+      openModal();
+    });
+
+    modalClose.addEventListener('click', closeModal);
+    videoModal.addEventListener('click', e => { if (e.target === videoModal) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
   </script>
 
 </body>
