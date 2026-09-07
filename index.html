@@ -609,7 +609,7 @@
     <small>Impresión de alta calidad</small>
     <h1>Imprimí tu<br><span>banner Roll-up</span></h1>
     <p>También hacemos estructura rígida o lona para eventos, locales y promociones.</p>
-    <a href="https://wa.me/5491151090514?text=Hola%21%20C%C3%B3mo%20va%3F%20Quer%C3%ADa%20consultar%20por%20un%20presupuesto%20de%20impresi%C3%B3n"
+    <a href="https://wa.me/5491151090514?text=Hola!%20%F0%9F%91%8B%20Estuve%20viendo%20la%20web%20y%20quiero%20consultar%20presupuesto%20para%20el%20Banner%20Roll-up%20est%C3%A1ndar%20(85x200).%20%C2%BFMe%20pasan%20info%3F"
        class="btn-wa" target="_blank" rel="noopener" style="margin-top:28px">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
@@ -862,7 +862,7 @@
   <section class="final-cta">
     <h2>¿Listo para imprimir?</h2>
     <p>Escribinos y te damos precio al instante.</p>
-    <a href="https://wa.me/5491151090514?text=Hola%21%20C%C3%B3mo%20va%3F%20Quer%C3%ADa%20consultar%20por%20un%20presupuesto%20de%20impresi%C3%B3n"
+    <a href="https://wa.me/5491151090514?text=Hola!%20Llegu%C3%A9%20al%20final%20de%20la%20web%20y%20me%20quedaron%20algunas%20dudas%20sobre%20los%20tiempos%20de%20entrega%20y%20los%20archivos.%20%C2%BFMe%20asesoran%20por%20favor%3F"
        class="btn-wa" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
@@ -1073,9 +1073,10 @@
 
     // Set initial position
     positionOverlay(FORMATS.rollup.p);
+    updateCtaLink();
 
     // ── Build WhatsApp CTA link ─────────────────────────────────────────────
-    function updateCtaLink() {
+    function getCtaContext() {
       let medidas = '';
       if (activeFormat === 'rollup') {
         medidas = '85×200 cm';
@@ -1085,8 +1086,17 @@
       } else if (activeFormat === 'lona') {
         medidas = `${lonaWInput.value}×${lonaHInput.value} cm`;
       }
-      const nombre = { rollup: 'Rollup', fijo: 'Estructura', lona: 'Lona con arandelas' }[activeFormat];
-      const msg = `Hola! Quiero consultar presupuesto:\n- Formato: ${nombre}\n- Medidas: ${medidas}`;
+      return {
+        formato: { rollup: 'Rollup', fijo: 'Estructura', lona: 'Lona con arandelas' }[activeFormat],
+        medidas
+      };
+    }
+
+    function updateCtaLink() {
+      const { formato, medidas } = getCtaContext();
+      const msg = currentFile
+        ? `Hola! Ya subí mi diseño al configurador y quiero avanzar con este presupuesto:\n- Formato: ${formato}\n- Medidas: ${medidas}\n¿Cómo seguimos?`
+        : `Hola! Estuve armando un presupuesto en la web (${formato} - ${medidas}) pero aún no subí mi diseño. ¿Me ayudan a terminarlo?`;
       ctaPresupuesto.href = `https://wa.me/5491151090514?text=${encodeURIComponent(msg)}`;
     }
 
