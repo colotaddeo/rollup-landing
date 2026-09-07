@@ -3,11 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-PQZ6D62P');</script>
+  <!-- End Google Tag Manager -->
+
+  <meta name="description" content="Roll up, estructura rígida o lona para eventos, locales y promociones." />
   <title>Imprimí tu banner Roll-up — Rollups & Lonas</title>
   <meta property="og:title"       content="Imprimí tu banner Roll-up" />
   <meta property="og:description" content="Roll up, estructura rígida o lona para eventos, locales y promociones." />
-  <meta property="og:image"       content="https://rollup-landing.vercel.app/img/rollup.png" />
-  <meta property="og:url"         content="https://rollup-landing.vercel.app" />
+  <meta property="og:image"       content="https://banner-rollup.vercel.app/img/rollup.png" />
+  <meta property="og:url"         content="https://banner-rollup.vercel.app" />
   <meta property="og:type"        content="website" />
   <meta name="twitter:card"       content="summary_large_image" />
   <style>
@@ -589,6 +599,11 @@
 </head>
 <body>
 
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PQZ6D62P"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
   <!-- HERO -->
   <section class="hero">
     <small>Impresión de alta calidad</small>
@@ -1080,6 +1095,11 @@
       document.querySelectorAll('.ph').forEach(el => el.style.display = 'none');
       standContainer.classList.add('has-preview');
       updateCtaLink();
+      if (!window.__designUploadedTracked) {
+        window.__designUploadedTracked = true;
+        window.dataLayer = window.dataLayer || [];
+        dataLayer.push({ 'event': 'design_uploaded' });
+      }
       ctaPresupuesto.style.display = 'flex';
       dropZone.style.display = 'none';
     }
@@ -1297,6 +1317,19 @@
     modalClose.addEventListener('click', closeModal);
     videoModal.addEventListener('click', e => { if (e.target === videoModal) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    // ── WhatsApp click tracking ───────────────────────────────────────────────
+    const waButtons = [
+      { el: document.querySelector('.hero .btn-wa'),      location: 'hero' },
+      { el: document.getElementById('cta-presupuesto'),   location: 'cta-presupuesto' },
+      { el: document.querySelector('.final-cta .btn-wa'), location: 'final' }
+    ];
+    waButtons.forEach(({ el, location }) => {
+      if (el) el.addEventListener('click', () => {
+        window.dataLayer = window.dataLayer || [];
+        dataLayer.push({ 'event': 'click_whatsapp', 'whatsapp_location': location });
+      });
+    });
   </script>
 
 </body>
